@@ -1,0 +1,40 @@
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.vim/
+
+# Backups
+*.bak
+*.backup
+*_backup/
+*.tmp
+
+# Logs
+*.log
+
+# ROM directories (don't commit actual ROM files)
+roms/
+*.zip
+*.7z
+*.rar
+*.rom
+*.nes
+*.snes
+*.gba
+*.gb
+
+# Test directories
+test_roms/
+temp/
