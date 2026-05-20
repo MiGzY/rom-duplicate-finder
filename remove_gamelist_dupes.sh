@@ -147,12 +147,12 @@ count_xml_fields() {
 
 extract_rom_path() {
     local entry="$1"
-    echo "$entry" | grep -oP '(?<=<path>)[^<]*' | head -1
+    echo "$entry" | grep -oP '(?<=<path>)[^<]*' | xargs | head -1
 }
 
 extract_game_name() {
     local entry="$1"
-    echo "$entry" | grep -oP '(?<=<name>)[^<]*' | head -1
+    echo "$entry" | grep -oP '(?<=<name>)[^<]*' | xargs | head -1
 }
 
 # Parse arguments
@@ -232,61 +232,59 @@ declare -A duplicate_info
 echo "Parsing gamelist.xml..."
 echo ""
 
-# Extract game entries
-local_ifs="$IFS"
-IFS=$'\n'
+# Extract game entries using sed to produce clean game blocks
+# Use a temporary file to avoid subshell issues with associative arrays
+temp_games=$(mktemp)
+sed -n '/<game>/,/<\/game>/p' "$GAMELIST_FILE" > "$temp_games"
 
-# Read the file and split by game entries
+# Parse each game entry
+game_entry=""
 while IFS= read -r line; do
     if [[ "$line" =~ \<game\> ]]; then
-        # Start of a game entry
+        # Start of new game entry
         game_entry="$line"
-        closing_found=false
+    elif [[ "$line" =~ \</game\> ]]; then
+        # End of game entry
+        game_entry+=$'\n'"$line"
         
-        while IFS= read -r next_line; do
-            game_entry+=$'\n'"$next_line"
-            
-            if [[ "$next_line" =~ \</game\> ]]; then
-                closing_found=true
-                break
-            fi
-        done
+        # Extract ROM path, name, and field count
+        rom_path=$(extract_rom_path "$game_entry")
+        game_name=$(extract_game_name "$game_entry")
+        field_count=$(count_xml_fields "$game_entry")
         
-        if [[ "$closing_found" == true ]]; then
-            # Extract ROM path
-            rom_path=$(extract_rom_path "$game_entry")
-            game_name=$(extract_game_name "$game_entry")
-            field_count=$(count_xml_fields "$game_entry")
-            
-            if [[ -n "$rom_path" ]]; then
-                if [[ -n "${path_to_entry[$rom_path]}" ]]; then
-                    # Duplicate found!
-                    orig_count=$(count_xml_fields "${path_to_entry[$rom_path]}")
-                    
-                    if [[ $field_count -gt $orig_count ]]; then
-                        # New entry has more metadata, keep it and mark old as duplicate
-                        duplicate_entries+=("${path_to_entry[$rom_path]}")
-                        path_to_entry[$rom_path]="$game_entry"
-                        duplicate_info["$rom_path"]="old (${orig_count} fields) → new (${field_count} fields)"
-                    else
-                        # Keep original
-                        duplicate_entries+=("$game_entry")
-                        duplicate_info["$rom_path"]="new (${field_count} fields) → old (${orig_count} fields)"
-                    fi
-                    
-                    print_duplicate "$game_name"
-                    echo "   Path: $rom_path"
-                    echo "   Action: ${duplicate_info[$rom_path]}"
-                    echo ""
-                else
+        if [[ -n "$rom_path" ]]; then
+            if [[ -v path_to_entry[$rom_path] ]]; then
+                # Duplicate found!
+                orig_count=$(count_xml_fields "${path_to_entry[$rom_path]}")
+                
+                if [[ $field_count -gt $orig_count ]]; then
+                    # New entry has more metadata, keep it and mark old as duplicate
+                    duplicate_entries+=("${path_to_entry[$rom_path]}")
                     path_to_entry[$rom_path]="$game_entry"
+                    duplicate_info["$rom_path"]="old (${orig_count} fields) → new (${field_count} fields)"
+                else
+                    # Keep original
+                    duplicate_entries+=("$game_entry")
+                    duplicate_info["$rom_path"]="new (${field_count} fields) → old (${orig_count} fields)"
                 fi
+                
+                print_duplicate "$game_name"
+                echo "   Path: $rom_path"
+                echo "   Action: ${duplicate_info[$rom_path]}"
+                echo ""
+            else
+                path_to_entry[$rom_path]="$game_entry"
             fi
         fi
+        
+        game_entry=""
+    else
+        # Middle of game entry
+        [[ -n "$game_entry" ]] && game_entry+=$'\n'"$line"
     fi
-done < "$GAMELIST_FILE"
+done < "$temp_games"
 
-IFS="$local_ifs"
+rm "$temp_games"
 
 echo ""
 echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
