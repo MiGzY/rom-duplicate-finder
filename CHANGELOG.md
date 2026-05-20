@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.0.0] - 2025-05-19
+## [1.0.0] - 2026-05-19
 
 ### Added
 - Initial release of ROM Duplicate Finder with two complementary scripts:
