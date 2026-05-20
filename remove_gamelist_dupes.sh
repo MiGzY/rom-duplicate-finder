@@ -240,8 +240,8 @@ IFS=$'\n'
 while IFS= read -r line; do
     if [[ "$line" =~ \<game\> ]]; then
         # Start of a game entry
-        local game_entry="$line"
-        local closing_found=false
+        game_entry="$line"
+        closing_found=false
         
         while IFS= read -r next_line; do
             game_entry+=$'\n'"$next_line"
@@ -337,7 +337,7 @@ case $choice in
         cp "$GAMELIST_FILE" "$BACKUP_FILE"
         
         # Create cleaned version
-        local temp_file=$(mktemp)
+        temp_file=$(mktemp)
         
         # Extract header
         sed -n '1,/<gameList>/p' "$GAMELIST_FILE" > "$temp_file"
