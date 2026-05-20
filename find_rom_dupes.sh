@@ -9,7 +9,7 @@
 # Usage: ./find_rom_dupes.sh [/path/to/roms]
 #        ./find_rom_dupes.sh  (interactive mode)
 #
-# GitHub: https://github.com/yourusername/rom-duplicate-finder
+# GitHub: https://github.com/MiGzY/rom-duplicate-finder
 #############################################################################
 
 set -euo pipefail
