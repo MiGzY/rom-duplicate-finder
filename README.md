@@ -31,7 +31,7 @@ Even so, make a backup of your ROM directory before running cleanup on a collect
 ## Quick start
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/MiGzY/rom-cleanup-suite/
 cd rom-cleanup-suite
 chmod +x rom_cleanup.sh
 ./rom_cleanup.sh
