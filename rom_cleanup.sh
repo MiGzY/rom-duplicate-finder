@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 
 #############################################################################
-# ROM Cleanup Suite - cleaned replacement
+# ROM Cleanup Suite
+#
+# Miguel Manzano / MiGzY
+# https://github.com/MiGzY/rom-cleanup-suite/
 #
 # Safer, finished version:
 #   1. Find exact duplicate ROM files by SHA256 and optionally move duplicates
