@@ -61,6 +61,7 @@ OPERATIONS:
     3. Find and remove game variants
        - Finds repeated <name> values with different ROM paths.
        - Lets you choose which path to keep for each game.
+       - Asks for both the gamelist.xml path and the ROM directory path.
        - Optionally moves removed ROM files to a quarantine folder.
 
 NOTES:
@@ -354,12 +355,21 @@ interactive_remove_variants() {
     print_header 'Find and Remove Game Variants'
     require_python3 || return
 
-    local gamelist
+    local gamelist rom_dir
     read -r -p 'Enter gamelist.xml path: ' gamelist || return
     gamelist=$(expand_path "$gamelist")
 
     if [[ ! -f "$gamelist" ]]; then
         printf '%sError:%s File not found: %s\n' "$RED" "$NC" "$gamelist"
+        pause
+        return
+    fi
+
+    read -r -p 'Enter ROM directory path for this gamelist: ' rom_dir || return
+    rom_dir=$(expand_path "$rom_dir")
+
+    if [[ ! -d "$rom_dir" ]]; then
+        printf '%sError:%s ROM directory not found: %s\n' "$RED" "$NC" "$rom_dir"
         pause
         return
     fi
@@ -375,11 +385,16 @@ import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-path = Path(sys.argv[1])
-gamelist_dir = path.parent
+gamelist_path = Path(sys.argv[1])
+rom_dir = Path(sys.argv[2]).expanduser()
 
 try:
-    tree = ET.parse(path)
+    rom_dir = rom_dir.resolve(strict=False)
+except Exception:
+    pass
+
+try:
+    tree = ET.parse(gamelist_path)
 except Exception as exc:
     print(f"Error: Could not parse XML: {exc}")
     raise SystemExit(1)
@@ -402,12 +417,29 @@ def norm_name(name: str) -> str:
 
 def resolve_rom_path(path_text: str) -> Path:
     raw = path_text.strip()
-    candidate = Path(raw)
+    if raw.startswith("file://"):
+        raw = raw[7:]
+
+    candidate = Path(raw).expanduser()
     if candidate.is_absolute():
         return candidate
-    if raw.startswith("./"):
+
+    # ES-DE gamelists often store paths as ./game.zip. Those are relative to
+    # the ROM system folder, not to ES-DE/gamelists/<system>/gamelist.xml.
+    while raw.startswith("./"):
         raw = raw[2:]
-    return gamelist_dir / raw
+
+    primary = (rom_dir / raw).resolve(strict=False)
+    if primary.exists():
+        return primary
+
+    # If a gamelist stores a path with an old or different parent folder, try
+    # the filename inside the user-supplied ROM directory before giving up.
+    basename_candidate = rom_dir / Path(raw).name
+    if basename_candidate.exists():
+        return basename_candidate
+
+    return primary
 
 def safe_move(src: Path, quarantine: Path) -> str:
     try:
@@ -416,7 +448,7 @@ def safe_move(src: Path, quarantine: Path) -> str:
         src_resolved = src
 
     try:
-        rel = src_resolved.relative_to(gamelist_dir.resolve(strict=False))
+        rel = src_resolved.relative_to(rom_dir.resolve(strict=False))
     except Exception:
         rel = Path(src.name)
 
@@ -457,6 +489,7 @@ if not variant_groups:
     print("No games with multiple ROM paths found.")
     raise SystemExit(0)
 
+print(f"Using ROM directory: {rom_dir}")
 print(f"Found {len(variant_groups)} game name(s) with multiple ROM paths.\n")
 print("For each group, enter the number to keep, press Enter to skip, or type q to stop.\n")
 
@@ -509,8 +542,8 @@ if answer not in {"y", "yes"}:
     print("No changes made.")
     raise SystemExit(0)
 
-backup = path.with_name(path.name + ".backup_" + _dt.datetime.now().strftime("%Y%m%d_%H%M%S"))
-shutil.copy2(path, backup)
+backup = gamelist_path.with_name(gamelist_path.name + ".backup_" + _dt.datetime.now().strftime("%Y%m%d_%H%M%S"))
+shutil.copy2(gamelist_path, backup)
 
 removed_paths = [text(entry, "path") for entry in selected_remove if text(entry, "path")]
 for entry in selected_remove:
@@ -521,7 +554,7 @@ try:
 except AttributeError:
     pass
 
-tree.write(path, encoding="utf-8", xml_declaration=True)
+tree.write(gamelist_path, encoding="utf-8", xml_declaration=True)
 removed_word = "entry" if len(selected_remove) == 1 else "entries"
 print(f"Backup created: {backup}")
 print(f"Removed {len(selected_remove)} {removed_word} from gamelist.xml.")
@@ -531,7 +564,7 @@ if move_answer not in {"y", "yes"}:
     print("ROM files left in place.")
     raise SystemExit(0)
 
-quarantine = gamelist_dir / ("_rom_cleanup_variants_" + _dt.datetime.now().strftime("%Y%m%d_%H%M%S"))
+quarantine = rom_dir / ("_rom_cleanup_variants_" + _dt.datetime.now().strftime("%Y%m%d_%H%M%S"))
 quarantine.mkdir(exist_ok=True)
 
 moved = 0
@@ -551,7 +584,7 @@ if missing:
     print(f"Skipped {missing} missing file(s).")
 PY
 
-    python3 "$py_script" "$gamelist"
+    python3 "$py_script" "$gamelist" "$rom_dir"
     rm -f "$py_script"
 
     pause
