@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<gameList>
+  <game>
+    <path>./Game A.zip</path>
+    <name>Game A</name>
+  </game>
+  <game>
+    <path>./Game A.zip</path>
+    <name>Game A</name>
+    <desc>Duplicate with more metadata.</desc>
+  </game>
+  <game>
+    <path>./Game B (USA).zip</path>
+    <name>Game B</name>
+  </game>
+  <game>
+    <path>./Game B (Europe).zip</path>
+    <name>Game B</name>
+  </game>
+</gameList>
