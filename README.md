@@ -79,13 +79,14 @@ You can also choose to move the removed ROM files into a timestamped quarantine 
 On Bazzite or similar systems, ROM directories are often under paths like:
 
 ```text
-/var/home/<user>/Emulation/roms
+/home/<user>/Games/retrodeck/roms/mame
 /var/home/<user>/ROMs
 ```
 
 Example gamelist paths may look like:
 
 ```text
+/home/<user>/Games/retrodeck/ES-DE/gamelists/mame/
 /var/home/<user>/Emulation/roms/snes/gamelist.xml
 /var/home/<user>/.emulationstation/gamelists/snes/gamelist.xml
 ```
