@@ -1,19 +1,14 @@
 # Contributing
 
-## Local checks
-
-Run:
+Run the checks before committing:
 
 ```bash
-make test
-make lint
+make check
 ```
 
-`make lint` requires ShellCheck. If ShellCheck is not installed, the Makefile prints a warning and skips linting.
+Keep cleanup conservative by default:
 
-## Style
-
-- Prefer safe shell patterns: `set -Eeuo pipefail`, quoted variables, and `--` before file paths where appropriate.
-- Do not permanently delete user ROM files from the script.
-- Preserve backup-first behavior for any command that edits `gamelist.xml`.
-- Keep interactive prompts clear and conservative.
+- do not permanently delete ROM files;
+- create backups before editing gamelist files;
+- do not move MAME/arcade clone or regional ZIPs from variant cleanup;
+- preserve metadata when removing gamelist entries.

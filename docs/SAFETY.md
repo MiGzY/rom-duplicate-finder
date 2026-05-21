@@ -1,28 +1,31 @@
-# Safety Notes
+# Safety notes
 
-ROM Cleanup Suite tries to avoid destructive behavior.
+## MAME and arcade ROMs
 
-## What it does not do by default
+Do not treat MAME regional versions, clones, bootlegs, BIOS sets, device sets, or CHDs as disposable duplicates.
 
-- It does not permanently delete duplicate ROM files.
-- It does not edit `gamelist.xml` without creating a backup.
-- It does not remove game variants without asking which item to keep.
+A visible duplicate in ES-DE can still rely on a parent or shared dependency. This is why option 3 is gamelist-only and does not move ROM ZIPs.
 
-## Before large cleanups
+## Backups
 
-For large libraries, make a separate backup first:
+Every gamelist write creates a timestamped backup next to the file being edited:
 
-```bash
-cp -a /path/to/roms /path/to/roms.backup
+```text
+gamelist.xml.backup_YYYYMMDD_HHMMSS
 ```
 
-Or use your preferred snapshot / backup tool.
+Keep these until you have launched ES-DE/RetroDECK and verified that metadata and games still work.
 
-## After cleanup
+## Quarantine folders
 
-Before deleting any quarantine folder:
+ROM files moved by exact duplicate cleanup go into folders like:
 
-1. launch a few games from the cleaned system;
-2. refresh or restart your frontend;
-3. confirm artwork and metadata still look right;
-4. keep the gamelist backup until you are confident the result is good.
+```text
+_rom_cleanup_duplicates_YYYYMMDD_HHMMSS
+```
+
+They are not deleted. Restore with `cp -avn` if needed.
+
+## ES-DE/RetroDECK
+
+Close ES-DE/RetroDECK before editing gamelist files. Do not run cleanup while the frontend is open or writing metadata.

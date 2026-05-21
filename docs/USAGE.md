@@ -1,68 +1,36 @@
-# Usage Guide
+# Usage
 
-## Start the menu
+Start the menu:
 
 ```bash
 ./rom_cleanup.sh
 ```
 
-## Show help
+Show help:
 
 ```bash
 ./rom_cleanup.sh --help
 ```
 
-## Recommended workflow
+## Recommended MAME/RetroDECK flow
 
-1. Back up the ROM system folder you are about to clean.
-2. Run option 1 to find exact duplicate ROM files.
-3. Move exact duplicates to quarantine and check that your emulator still launches the games you care about.
-4. Run option 2 on the relevant `gamelist.xml` file to remove duplicate XML entries.
-5. Run option 3 only when you want to manually choose between regional versions, revisions, hacks, prototypes, or other variants.
+1. Restore any accidentally quarantined MAME ROMs.
+2. Run option 5 if metadata is missing and you have a good backup.
+3. Run option 4 to remove orphan gamelist entries.
+4. Run option 2 to remove duplicate entries that point to the same path.
+5. Run option 3 only if you want to hide regional/clone variants from the gamelist.
+6. Run option 1 for exact byte-for-byte duplicate ROM files, and provide the gamelist path when prompted.
 
-## Quarantine folders
+## Path prompts
 
-The script creates timestamped quarantine folders rather than deleting ROM files.
-
-Duplicate ROM quarantine folders look like:
-
-```text
-_rom_cleanup_duplicates_YYYYMMDD_HHMMSS
-```
-
-Variant quarantine folders look like:
+When asked for `gamelist.xml`, enter a file path like:
 
 ```text
-_rom_cleanup_variants_YYYYMMDD_HHMMSS
+/home/migz/Games/retrodeck/ES-DE/gamelists/mame/gamelist.xml
 ```
 
-After verifying your library, you can manually delete the quarantine folders.
-
-## `gamelist.xml` backups
-
-Before editing a gamelist, the script creates a timestamped backup next to the original file:
+When asked for the ROM directory, enter the real ROM folder like:
 
 ```text
-gamelist.xml.backup_YYYYMMDD_HHMMSS
+/home/migz/Games/retrodeck/roms/mame
 ```
-
-To roll back manually:
-
-```bash
-cp gamelist.xml.backup_YYYYMMDD_HHMMSS gamelist.xml
-```
-
-## Notes on variants
-
-The variant finder groups entries by normalized `<name>` text. That means games with the same visible name but different paths will be grouped together.
-
-This is useful for choosing between files such as:
-
-```text
-Super Game (USA).zip
-Super Game (Europe).zip
-Super Game (Japan).zip
-Super Game (Rev 1).zip
-```
-
-It will not automatically decide which region, revision, hack, or translation is best. You make that choice interactively.

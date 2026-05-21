@@ -1,19 +1,16 @@
 # Changelog
 
-## v0.1.0 - Initial repo version
+## 0.2.0
 
-- Added cleaned `rom_cleanup.sh` entrypoint.
-- Fixed unset `$1` crash when running with no arguments.
-- Replaced unreliable menu color output with safer `printf` handling.
-- Added duplicate ROM detection by SHA256.
-- Added quarantine-based ROM movement.
-- Added duplicate `gamelist.xml` cleanup with backups.
-- Added interactive same-name variant review.
-- Added README, usage docs, safety notes, Makefile, smoke tests, and CI workflow.
+- Added separate `gamelist.xml` and ROM directory prompts for gamelist operations.
+- Added MAME/arcade-safe variant cleanup that edits `gamelist.xml` only.
+- Removed ROM moving from regional/clone variant cleanup.
+- Added metadata merging before duplicate or variant gamelist entries are removed.
+- Added orphan gamelist entry cleanup.
+- Added metadata restore from backup/source gamelist.
+- Made exact duplicate ROM cleanup optionally gamelist-aware so referenced files are not moved.
+- Added smoke tests for metadata preservation, orphan cleanup, variant cleanup, and reference-safe duplicate cleanup.
 
-## v0.1.1 - Repo polish
+## 0.1.0
 
-- Added MIT license.
-- Added install and uninstall Makefile targets.
-- Added EditorConfig and Git attributes.
-- Added `make check` convenience target.
+- Initial ROM Cleanup Suite.
